@@ -28,6 +28,7 @@ export default function Home() {
       });
 
       setPrediction(response.data.prediction);
+      console.log(response.data.prediction)
     } catch (error) {
       console.error('Error making prediction:', error);
     }
@@ -39,7 +40,14 @@ export default function Home() {
         <input {...getInputProps()} />
         <p>Drag 'n' drop an image here, or click to select one</p>
       </div>
-      {prediction && <p>Prediction: {prediction}</p>}
+
+      {prediction && <div className='flex flex-col'>
+        <p>Prediction</p>
+        {prediction[0].map((item, index) => (
+          <p key={index}>Accuracy: {item.toFixed(2)}</p>
+        ))}
+      </div>
+      }
     </main>
   );
 }

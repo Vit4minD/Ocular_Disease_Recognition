@@ -37,7 +37,7 @@ def predict():
         
         # Make prediction
         prediction = model.predict(input_data)
-        return jsonify({'prediction': prediction.tolist()})
+        return jsonify({'prediction': prediction})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
