@@ -27,7 +27,7 @@ export default function Home() {
   const [submitting, setSubmitting] = useState(false);
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const [bestIndex, setBestIndex] = useState(2);
+  const [bestIndex, setBestIndex] = useState(0);
   const [bestAcc, setBestAcc] = useState(0);
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -52,17 +52,19 @@ export default function Home() {
         },
       });
 
-      await delay(800);
-      await setPrediction(response.data.prediction);
-      setSubmitting(false)
-      for (let i = 0; i < prediction[0].length; i++) {
-        const acc = Number(prediction[0][i].toFixed(2)) * 100
+
+      for (let i = 0; i < response.data.prediction[0].length; i++) {
+        const acc = Number(response.data.prediction[0][i].toFixed(2)) * 100
+        console.log(acc)
         if (bestAcc < acc) {
-          setBestAcc(acc)
-          setBestIndex(2)
+          await setBestAcc(acc)
+          await setBestIndex(i)
         }
       }
-      console.log(response.data.prediction)
+      await delay(1500);
+      await setPrediction(response.data.prediction);
+      setSubmitting(false)
+
     } catch (error) {
       console.error('Error making prediction:', error);
     }
@@ -205,7 +207,7 @@ export default function Home() {
               ) : <div className='flex flex-col text-center justify-center text-2xl items-center'>
                 <FaEye className='text-6xl mb-4' />
                 <div className='flex flex-row gap-x-4 mb-8 justify-center items-center w-[95vw]'>
-                  <a href={links[bestIndex]}className='text-6xl underline hover:cursor-pointer underline-offset-[6px] hover:decoration-[8px]'>{classes[bestIndex]}</a>
+                  <a href={links[bestIndex]} className='text-6xl underline hover:cursor-pointer underline-offset-[6px] hover:decoration-[8px]'>{classes[bestIndex]}</a>
                 </div>
                 {prediction[0].map((item, index) => (
                   <>
