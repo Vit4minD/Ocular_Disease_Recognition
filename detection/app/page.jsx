@@ -4,11 +4,31 @@ import axios from 'axios';
 import { useState } from 'react';
 import { FaCloudDownloadAlt } from "react-icons/fa";
 import { SpinnerDotted } from 'spinners-react';
+import { FaEye } from "react-icons/fa";
+
+const classes = {
+  0: "Age related Macular Degeneration (A)",
+  1: "Cataract (C)",
+  2: "Glaucoma (G)",
+  3: "Pathological Myopia (M)",
+  4: "Normal (N)",
+}
+
+const links = {
+  0: "https://www.hopkinsmedicine.org/health/conditions-and-diseases/agerelated-macular-degeneration-amd#:~:text=Age%2Drelated%20macular%20degeneration%20(AMD)%20is%20a%20disease%20that,diet%20high%20in%20saturated%20fat.",
+  1: "https://www.nei.nih.gov/learn-about-eye-health/eye-conditions-and-diseases/cataracts#:~:text=What%20are%20cataracts%3F,to%20get%20rid%20of%20cataracts.",
+  2: "https://www.nei.nih.gov/learn-about-eye-health/eye-conditions-and-diseases/glaucoma#:~:text=What%20is%20glaucoma%3F,a%20comprehensive%20dilated%20eye%20exam.",
+  3: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7731360/",
+  4: "Normal (N)",
+}
 
 export default function Home() {
   const [prediction, setPrediction] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const [bestIndex, setBestIndex] = useState(0);
+  const [bestAcc, setBestAcc] = useState(0);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: 'image/*',
@@ -33,8 +53,15 @@ export default function Home() {
       });
 
       await delay(800);
-      setPrediction(response.data.prediction);
+      await setPrediction(response.data.prediction);
       setSubmitting(false)
+      for (let i = 0; i < prediction[0].length; i++) {
+        const acc = Number(prediction[0][i].toFixed(2)) * 100
+        if (bestAcc < acc) {
+          setBestAcc(acc)
+          setBestIndex(i)
+        }
+      }
       console.log(response.data.prediction)
     } catch (error) {
       console.error('Error making prediction:', error);
@@ -158,7 +185,7 @@ export default function Home() {
 
           <section id="footer">
             <div class="inner">
-              <h2 class="major">Classify Your Retina Scan!</h2>
+              <h2 class="major text-4xl text-center">Classify Your Retina Scan!</h2>
               {prediction === null ? (
                 submitting ? (
                   <div className="m-0 flex flex-row w-full h-[28rem] items-center justify-center border-dashed border-2 border-gray-400 p-4 rounded">
@@ -175,50 +202,18 @@ export default function Home() {
                     </div>
                   </div>
                 )
-              ) : <div>{prediction[0].map((item, index) => (
-                <p key={index}>Accuracy: {item.toFixed(2)}</p>
-              ))}</div>}
-
-
-
-
-
-
-
-              {/* <form method="post" action="#">
-                <div class="fields">
-                  <div class="field">
-                    <label for="name">Name</label>
-                    <input type="text" name="name" id="name" />
-                  </div>
-                  <div class="field">
-                    <label for="email">Email</label>
-                    <input type="email" name="email" id="email" />
-                  </div>
-                  <div class="field">
-                    <label for="message">Message</label>
-                    <textarea name="message" id="message" rows="4"></textarea>
-                  </div>
+              ) : <div className='flex flex-col text-center justify-center text-2xl items-center'>
+                <FaEye className='text-6xl mb-4' />
+                <div className='flex flex-row gap-x-4 mb-8 justify-center items-center w-[95vw]'>
+                  <a href={links[bestIndex]}className='text-6xl underline hover:cursor-pointer underline-offset-[6px] hover:decoration-[8px]'>{classes[bestIndex]}</a>
                 </div>
-                <ul class="actions">
-                  <li><input type="submit" value="Send Message" /></li>
-                </ul>
-              </form> */}
-              {/* <ul class="contact">
-                <li class="icon solid fa-home">
-                  Untitled Inc<br />
-                  1234 Somewhere Road Suite #2894<br />
-                  Nashville, TN 00000-0000
-                </li>
-                <li class="icon solid fa-phone">(000) 000-0000</li>
-                <li class="icon solid fa-envelope"><a href="#">information@untitled.tld</a></li>
-                <li class="icon brands fa-twitter"><a href="#">twitter.com/untitled-tld</a></li>
-                <li class="icon brands fa-facebook-f"><a href="#">facebook.com/untitled-tld</a></li>
-                <li class="icon brands fa-instagram"><a href="#">instagram.com/untitled-tld</a></li>
-              </ul>
-              <ul class="copyright">
-                <li>&copy; Untitled Inc. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-              </ul> */}
+                {prediction[0].map((item, index) => (
+                  <>
+                    <p className="w-[70%] text-left text-3xl" key={index}><b>{classes[index]}</b>: {Number(item.toFixed(2)) * 100}%</p>
+                  </>
+                ))}
+                <button onClick={() => { setPrediction(null) }}>Try A New Image!</button>
+              </div>}
             </div>
           </section>
 
