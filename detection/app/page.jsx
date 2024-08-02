@@ -2,45 +2,51 @@
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import { useState } from 'react';
-import Head from 'next/head'; // Import Head component from next/head
+import { FaCloudDownloadAlt } from "react-icons/fa";
+import { SpinnerDotted } from 'spinners-react';
 
 export default function Home() {
-  // const [prediction, setPrediction] = useState(null);
+  const [prediction, setPrediction] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  // const { getRootProps, getInputProps } = useDropzone({
-  //   accept: 'image/*',
-  //   onDrop: (acceptedFiles) => {
-  //     if (acceptedFiles.length > 0) {
-  //       const file = acceptedFiles[0];
-  //       handleFile(file);
-  //     }
-  //   },
-  // });
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: 'image/*',
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+        handleFile(file);
+      }
+    },
+  });
 
-  // async function handleFile(file) {
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append('file', file);
+  async function handleFile(file) {
+    try {
+      setSubmitting(true)
+      const formData = new FormData();
+      formData.append('file', file);
 
-  //     const response = await axios.post('http://127.0.0.1:5000/predict', formData, {
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //     });
+      const response = await axios.post('http://127.0.0.1:5000/predict', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-  //     setPrediction(response.data.prediction);
-  //     console.log(response.data.prediction)
-  //   } catch (error) {
-  //     console.error('Error making prediction:', error);
-  //   }
-  // }
+      await delay(800);
+      setPrediction(response.data.prediction);
+      setSubmitting(false)
+      console.log(response.data.prediction)
+    } catch (error) {
+      console.error('Error making prediction:', error);
+    }
+  }
 
   return (
     // <main className="p-4">
-    //   <div {...getRootProps()} className="border-dashed border-2 border-gray-400 p-4 rounded">
-    //     <input {...getInputProps()} />
-    //     <p>Drag 'n' drop an image here, or click to select one</p>
-    //   </div>
+    // <div {...getRootProps()} className="border-dashed border-2 border-gray-400 p-4 rounded">
+    //   <input {...getInputProps()} />
+    //   <p>Drag 'n' drop an image here, or click to select one</p>
+    // </div>
 
     //   {prediction && <div className='flex flex-col'>
     //     <p>Prediction</p>
@@ -51,7 +57,7 @@ export default function Home() {
     //   }
     // </main>
     <html className='w-[100%] h-[100%]]'  >
-      <head  suppressHydrationWarning>
+      <head suppressHydrationWarning>
         <title>Ocular Disease Recognition</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
@@ -71,10 +77,10 @@ export default function Home() {
             </div>
           </section>
 
-        
+
           <section id="wrapper">
 
-        
+
             <section id="one" class="wrapper spotlight style1">
               <div class="inner">
                 <a href="#" class="image"><img src="images/eyedoctor.jpg" alt="" /></a>
@@ -86,7 +92,7 @@ export default function Home() {
               </div>
             </section>
 
-       
+
             <section id="two" class="wrapper alt spotlight style2">
               <div class="inner">
                 <a href="#" class="image"><img src="images/eye.jpg" alt="" /></a>
@@ -98,7 +104,7 @@ export default function Home() {
               </div>
             </section>
 
-         
+
             <section id="three" class="wrapper spotlight style3">
               <div class="inner">
                 <a href="#" class="image"><img src="images/retina.jpg" alt="" /></a>
@@ -110,7 +116,7 @@ export default function Home() {
               </div>
             </section>
 
-      
+
             <section id="four" class="wrapper alt style1">
               <div class="inner">
                 <h2 class="major">Common Eye Diseases</h2>
@@ -149,12 +155,37 @@ export default function Home() {
 
           </section>
 
-   
+
           <section id="footer">
             <div class="inner">
-              <h2 class="major">Get in touch</h2>
-              <p>Cras mattis ante fermentum, malesuada neque vitae, eleifend erat. Phasellus non pulvinar erat. Fusce tincidunt, nisl eget mattis egestas, purus ipsum consequat orci, sit amet lobortis lorem lacus in tellus. Sed ac elementum arcu. Quisque placerat auctor laoreet.</p>
-              <form method="post" action="#">
+              <h2 class="major">Classify Your Retina Scan!</h2>
+              {prediction === null ? (
+                submitting ? (
+                  <div className="m-0 flex flex-row w-full h-[28rem] items-center justify-center border-dashed border-2 border-gray-400 p-4 rounded">
+                    <SpinnerDotted color="white" size={150} thickness={150} enabled={true} />
+                  </div>
+                ) : (
+                  <div {...getRootProps()} className="m-0 flex flex-row w-full h-[28rem] items-center justify-center border-dashed border-2 border-gray-400 p-4 rounded">
+                    <input {...getInputProps()} />
+                    <div className='flex flex-col justify-center items-center gap-y-4'>
+                      <FaCloudDownloadAlt className='text-center text-9xl' />
+                      <p className='m-0 font-semibold text-2xl'>Drag & Drop to Upload File</p>
+                      <p className='m-0 text-2xl text-center'>OR</p>
+                      <button className=''>Browse Files</button>
+                    </div>
+                  </div>
+                )
+              ) : <div>{prediction[0].map((item, index) => (
+                <p key={index}>Accuracy: {item.toFixed(2)}</p>
+              ))}</div>}
+
+
+
+
+
+
+
+              {/* <form method="post" action="#">
                 <div class="fields">
                   <div class="field">
                     <label for="name">Name</label>
@@ -172,8 +203,8 @@ export default function Home() {
                 <ul class="actions">
                   <li><input type="submit" value="Send Message" /></li>
                 </ul>
-              </form>
-              <ul class="contact">
+              </form> */}
+              {/* <ul class="contact">
                 <li class="icon solid fa-home">
                   Untitled Inc<br />
                   1234 Somewhere Road Suite #2894<br />
@@ -187,13 +218,13 @@ export default function Home() {
               </ul>
               <ul class="copyright">
                 <li>&copy; Untitled Inc. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-              </ul>
+              </ul> */}
             </div>
           </section>
 
         </div>
 
-    
+
         <script src="assets/js/jquery.min.js"></script>
         <script src="assets/js/jquery.scrollex.min.js"></script>
         <script src="assets/js/browser.min.js"></script>
@@ -201,7 +232,7 @@ export default function Home() {
         <script src="assets/js/util.js"></script>
         <script src="assets/js/main.js"></script>
 
-      </body>
-    </html>
+      </body >
+    </html >
   );
 }
