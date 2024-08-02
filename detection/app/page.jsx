@@ -27,7 +27,7 @@ export default function Home() {
   const [submitting, setSubmitting] = useState(false);
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const [bestIndex, setBestIndex] = useState(0);
+  const [bestIndex, setBestIndex] = useState(2);
   const [bestAcc, setBestAcc] = useState(0);
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -59,7 +59,7 @@ export default function Home() {
         const acc = Number(prediction[0][i].toFixed(2)) * 100
         if (bestAcc < acc) {
           setBestAcc(acc)
-          setBestIndex(i)
+          setBestIndex(2)
         }
       }
       console.log(response.data.prediction)
